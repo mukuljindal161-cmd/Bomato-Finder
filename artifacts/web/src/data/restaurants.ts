@@ -1,0 +1,163 @@
+export type Restaurant = {
+  id: number;
+  name: string;
+  image: string;
+  rating: number;
+  reviewCount: number;
+  cuisines: string[];
+  priceLevel: number;
+  deliveryTime: string;
+  isOpen: boolean;
+  distance: string;
+};
+
+export const restaurants: Restaurant[] = [
+  {
+    id: 1,
+    name: "The Golden Fork",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80",
+    rating: 4.8,
+    reviewCount: 1243,
+    cuisines: ["Italian", "Mediterranean"],
+    priceLevel: 3,
+    deliveryTime: "25–35 min",
+    isOpen: true,
+    distance: "1.2 km",
+  },
+  {
+    id: 2,
+    name: "Sakura Garden",
+    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80",
+    rating: 4.6,
+    reviewCount: 892,
+    cuisines: ["Japanese", "Sushi"],
+    priceLevel: 3,
+    deliveryTime: "30–45 min",
+    isOpen: true,
+    distance: "2.1 km",
+  },
+  {
+    id: 3,
+    name: "Spice Route",
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
+    rating: 4.5,
+    reviewCount: 734,
+    cuisines: ["Indian", "Curry"],
+    priceLevel: 2,
+    deliveryTime: "20–30 min",
+    isOpen: true,
+    distance: "0.8 km",
+  },
+  {
+    id: 4,
+    name: "La Maison Bistro",
+    image: "https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=600&q=80",
+    rating: 4.9,
+    reviewCount: 2104,
+    cuisines: ["French", "European"],
+    priceLevel: 4,
+    deliveryTime: "40–55 min",
+    isOpen: true,
+    distance: "3.5 km",
+  },
+  {
+    id: 5,
+    name: "Taco Fiesta",
+    image: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=600&q=80",
+    rating: 4.3,
+    reviewCount: 567,
+    cuisines: ["Mexican", "Tex-Mex"],
+    priceLevel: 1,
+    deliveryTime: "15–25 min",
+    isOpen: true,
+    distance: "0.5 km",
+  },
+  {
+    id: 6,
+    name: "The Coastal Table",
+    image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600&q=80",
+    rating: 4.7,
+    reviewCount: 1089,
+    cuisines: ["Seafood", "American"],
+    priceLevel: 3,
+    deliveryTime: "35–50 min",
+    isOpen: false,
+    distance: "4.2 km",
+  },
+  {
+    id: 7,
+    name: "Dragon Palace",
+    image: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=600&q=80",
+    rating: 4.4,
+    reviewCount: 823,
+    cuisines: ["Chinese", "Dim Sum"],
+    priceLevel: 2,
+    deliveryTime: "25–40 min",
+    isOpen: true,
+    distance: "1.8 km",
+  },
+  {
+    id: 8,
+    name: "Olive & Thyme",
+    image: "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=600&q=80",
+    rating: 4.6,
+    reviewCount: 445,
+    cuisines: ["Greek", "Mediterranean"],
+    priceLevel: 2,
+    deliveryTime: "20–35 min",
+    isOpen: true,
+    distance: "1.1 km",
+  },
+  {
+    id: 9,
+    name: "Seoul Kitchen",
+    image: "https://images.unsplash.com/photo-1517244683847-7456b63c5969?w=600&q=80",
+    rating: 4.5,
+    reviewCount: 678,
+    cuisines: ["Korean", "BBQ"],
+    priceLevel: 2,
+    deliveryTime: "30–45 min",
+    isOpen: true,
+    distance: "2.7 km",
+  },
+  {
+    id: 10,
+    name: "The Garden Brasserie",
+    image: "https://images.unsplash.com/photo-1526234362653-3b75a0c07438?w=600&q=80",
+    rating: 4.2,
+    reviewCount: 312,
+    cuisines: ["Vegetarian", "Vegan", "Organic"],
+    priceLevel: 2,
+    deliveryTime: "20–30 min",
+    isOpen: true,
+    distance: "0.9 km",
+  },
+  {
+    id: 11,
+    name: "El Gaucho Steakhouse",
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
+    rating: 4.8,
+    reviewCount: 1567,
+    cuisines: ["Steakhouse", "Argentine"],
+    priceLevel: 4,
+    deliveryTime: "45–60 min",
+    isOpen: true,
+    distance: "5.3 km",
+  },
+  {
+    id: 12,
+    name: "Noodle House",
+    image: "https://images.unsplash.com/photo-1569562211093-4ed0d0758359?w=600&q=80",
+    rating: 4.1,
+    reviewCount: 289,
+    cuisines: ["Thai", "Vietnamese", "Noodles"],
+    priceLevel: 1,
+    deliveryTime: "15–25 min",
+    isOpen: false,
+    distance: "1.4 km",
+  },
+];
+
+export const allCuisines = Array.from(
+  new Set(restaurants.flatMap((r) => r.cuisines))
+).sort();

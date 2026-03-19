@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Link, useSearch } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { ArrowLeft, Receipt } from "lucide-react";
 
 type OrderItem = {
@@ -17,6 +17,7 @@ type OrderData = {
 
 export default function OrderSummaryPage() {
   const search = useSearch();
+  const [, navigate] = useLocation();
 
   const orderData: OrderData | null = useMemo(() => {
     try {
@@ -129,7 +130,13 @@ export default function OrderSummaryPage() {
 
       <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-md border-t border-border">
         <div className="max-w-2xl mx-auto">
-          <button className="w-full bg-primary text-primary-foreground px-5 py-4 rounded-2xl font-bold text-base hover:opacity-90 active:scale-[0.99] transition-all duration-150 shadow-lg">
+          <button
+            onClick={() => {
+              const encoded = encodeURIComponent(JSON.stringify(orderData));
+              navigate(`/payment?data=${encoded}`);
+            }}
+            className="w-full bg-primary text-primary-foreground px-5 py-4 rounded-2xl font-bold text-base hover:opacity-90 active:scale-[0.99] transition-all duration-150 shadow-lg"
+          >
             Proceed to Payment
           </button>
           <p className="text-center text-xs text-muted-foreground mt-2">

@@ -1,4 +1,5 @@
 import { Star, Clock, MapPin } from "lucide-react";
+import { Link } from "wouter";
 import type { Restaurant } from "@/data/restaurants";
 
 interface RestaurantCardProps {
@@ -77,12 +78,20 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           <span className="text-xs text-muted-foreground">
             {restaurant.reviewCount.toLocaleString()} reviews
           </span>
-          <button
-            className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-90 active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!restaurant.isOpen}
-          >
-            {restaurant.isOpen ? "Order Now" : "Closed"}
-          </button>
+          {restaurant.isOpen ? (
+            <Link href={`/restaurant/${restaurant.id}`}>
+              <button className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-90 active:scale-95 transition-all duration-150">
+                Order Now
+              </button>
+            </Link>
+          ) : (
+            <button
+              disabled
+              className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl opacity-50 cursor-not-allowed"
+            >
+              Closed
+            </button>
+          )}
         </div>
       </div>
     </div>

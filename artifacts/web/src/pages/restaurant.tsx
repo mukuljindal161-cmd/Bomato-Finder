@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "wouter";
-import { ArrowLeft, Star, Clock, MapPin } from "lucide-react";
+import { useParams, Link, useLocation } from "wouter";
+import { ArrowLeft, Star, Clock, MapPin, ShoppingBag } from "lucide-react";
 import { restaurants } from "@/data/restaurants";
 import { menus, type MenuItem } from "@/data/menu";
 
@@ -16,48 +16,57 @@ function PriceLevel({ level }: { level: number }) {
   );
 }
 
-function ItemCounter({ item }: { item: MenuItem }) {
-  const [count, setCount] = useState(0);
+interface ItemCounterProps {
+  count: number;
+  onAdd: () => void;
+  onIncrement: () => void;
+  onDecrement: () => void;
+}
 
-  const handleAdd = () => setCount(1);
-  const handleIncrement = () => setCount((c) => c + 1);
-  const handleDecrement = () => setCount((c) => Math.max(0, c - 1));
+function ItemCounter({ count, onAdd, onIncrement, onDecrement }: ItemCounterProps) {
+  if (count === 0) {
+    return (
+      <button
+        onClick={onAdd}
+        className="text-sm font-semibold px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all duration-150 shrink-0"
+      >
+        Add
+      </button>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-2 shrink-0">
-      {count === 0 ? (
-        <button
-          onClick={handleAdd}
-          className="text-sm font-semibold px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all duration-150"
-        >
-          Add
-        </button>
-      ) : (
-        <div className="flex items-center gap-2 bg-primary rounded-xl px-1 py-1">
-          <button
-            onClick={handleDecrement}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-primary-foreground font-bold text-lg hover:bg-white/20 active:bg-white/30 transition-colors"
-            aria-label="Decrease"
-          >
-            −
-          </button>
-          <span className="text-sm font-bold text-primary-foreground min-w-[1.25rem] text-center">
-            {count}
-          </span>
-          <button
-            onClick={handleIncrement}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-primary-foreground font-bold text-lg hover:bg-white/20 active:bg-white/30 transition-colors"
-            aria-label="Increase"
-          >
-            +
-          </button>
-        </div>
-      )}
+    <div className="flex items-center gap-2 bg-primary rounded-xl px-1 py-1 shrink-0">
+      <button
+        onClick={onDecrement}
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-primary-foreground font-bold text-lg hover:bg-white/20 active:bg-white/30 transition-colors"
+        aria-label="Decrease"
+      >
+        −
+      </button>
+      <span className="text-sm font-bold text-primary-foreground min-w-[1.25rem] text-center select-none">
+        {count}
+      </span>
+      <button
+        onClick={onIncrement}
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-primary-foreground font-bold text-lg hover:bg-white/20 active:bg-white/30 transition-colors"
+        aria-label="Increase"
+      >
+        +
+      </button>
     </div>
   );
 }
 
-function MenuItemRow({ item }: { item: MenuItem }) {
+interface MenuItemRowProps {
+  item: MenuItem;
+  count: number;
+  onAdd: () => void;
+  onIncrement: () => void;
+  onDecrement: () => void;
+}
+
+function MenuItemRow({ item, count, onAdd, onIncrement, onDecrement }: MenuItemRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 py-4 border-b border-border last:border-0">
       <div className="flex-1 min-w-0">
@@ -71,21 +80,43 @@ function MenuItemRow({ item }: { item: MenuItem }) {
           ${item.price.toFixed(2)}
         </p>
       </div>
-      <ItemCounter item={item} />
+      <ItemCounter
+        count={count}
+        onAdd={onAdd}
+        onIncrement={onIncrement}
+        onDecrement={onDecrement}
+      />
     </div>
   );
 }
 
-function MenuSection({ category, items }: { category: string; items: MenuItem[] }) {
+interface MenuSectionProps {
+  category: string;
+  items: MenuItem[];
+  quantities: Record<number, number>;
+  onChange: (itemId: number, delta: number) => void;
+}
+
+function MenuSection({ category, items, quantities, onChange }: MenuSectionProps) {
   return (
     <section className="mb-8">
       <h3 className="text-lg font-bold text-foreground mb-1 pb-2 border-b-2 border-primary/20">
         {category}
       </h3>
       <div>
-        {items.map((item) => (
-          <MenuItemRow key={item.id} item={item} />
-        ))}
+        {items.map((item) => {
+          const count = quantities[item.id] ?? 0;
+          return (
+            <MenuItemRow
+              key={item.id}
+              item={item}
+              count={count}
+              onAdd={() => onChange(item.id, 1)}
+              onIncrement={() => onChange(item.id, 1)}
+              onDecrement={() => onChange(item.id, -1)}
+            />
+          );
+        })}
       </div>
     </section>
   );
@@ -93,13 +124,16 @@ function MenuSection({ category, items }: { category: string; items: MenuItem[] 
 
 export default function RestaurantPage() {
   const params = useParams<{ id: string }>();
+  const [, navigate] = useLocation();
   const restaurantId = Number(params.id);
 
   const restaurant = restaurants.find((r) => r.id === restaurantId);
   const menu = menus[restaurantId];
 
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
+
   const groupedMenu = useMemo(() => {
-    if (!menu) return {};
+    if (!menu) return {} as Record<string, MenuItem[]>;
     const groups: Record<string, MenuItem[]> = {};
     for (const item of menu.items) {
       if (!groups[item.category]) groups[item.category] = [];
@@ -107,6 +141,37 @@ export default function RestaurantPage() {
     }
     return groups;
   }, [menu]);
+
+  const totalItems = useMemo(
+    () => Object.values(quantities).reduce((s, q) => s + q, 0),
+    [quantities]
+  );
+
+  const handleChange = (itemId: number, delta: number) => {
+    setQuantities((prev) => {
+      const next = { ...prev, [itemId]: Math.max(0, (prev[itemId] ?? 0) + delta) };
+      if (next[itemId] === 0) delete next[itemId];
+      return next;
+    });
+  };
+
+  const handleViewOrder = () => {
+    if (!menu || !restaurant) return;
+    const orderedItems = menu.items
+      .filter((item) => (quantities[item.id] ?? 0) > 0)
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: quantities[item.id],
+      }));
+    const encoded = encodeURIComponent(JSON.stringify({
+      restaurantName: restaurant.name,
+      restaurantId: restaurant.id,
+      items: orderedItems,
+    }));
+    navigate(`/order-summary?data=${encoded}`);
+  };
 
   if (!restaurant) {
     return (
@@ -122,7 +187,7 @@ export default function RestaurantPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-28">
       <div className="relative">
         <div className="relative w-full h-72 sm:h-96 overflow-hidden">
           <img
@@ -186,17 +251,40 @@ export default function RestaurantPage() {
           </div>
         </div>
 
-        <div className="mb-12">
+        <div className="mb-4">
           <h2 className="text-2xl font-black text-foreground mb-6">Menu</h2>
           {Object.keys(groupedMenu).length === 0 ? (
             <p className="text-muted-foreground">No menu available.</p>
           ) : (
             Object.entries(groupedMenu).map(([category, items]) => (
-              <MenuSection key={category} category={category} items={items} />
+              <MenuSection
+                key={category}
+                category={category}
+                items={items}
+                quantities={quantities}
+                onChange={handleChange}
+              />
             ))
           )}
         </div>
       </div>
+
+      {totalItems > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-md border-t border-border">
+          <div className="max-w-3xl mx-auto">
+            <button
+              onClick={handleViewOrder}
+              className="w-full flex items-center justify-between bg-primary text-primary-foreground px-5 py-4 rounded-2xl font-bold text-base hover:opacity-90 active:scale-[0.99] transition-all duration-150 shadow-lg"
+            >
+              <span className="bg-white/20 text-white text-sm font-bold px-2.5 py-0.5 rounded-lg">
+                {totalItems} {totalItems === 1 ? "item" : "items"}
+              </span>
+              <span>View Order</span>
+              <ShoppingBag className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

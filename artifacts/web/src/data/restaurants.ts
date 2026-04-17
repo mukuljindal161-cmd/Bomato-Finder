@@ -147,7 +147,7 @@ export const restaurants: Restaurant[] = [
   {
     id: 12,
     name: "Noodle House",
-    image: "https://images.unsplash.com/photo-1569562211093-4ed0d0758359?w=600&q=80",
+    image: "https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=1200&q=80",
     rating: 4.1,
     reviewCount: 289,
     cuisines: ["Thai", "Vietnamese", "Noodles"],

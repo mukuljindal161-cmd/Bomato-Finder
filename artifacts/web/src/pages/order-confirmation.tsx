@@ -3,8 +3,9 @@ import { Link, useSearch } from "wouter";
 import { CheckCircle2, MapPin, Clock, UtensilsCrossed } from "lucide-react";
 
 type ConfirmData = {
+  orderNumber?: string;
   restaurantName: string;
-  restaurantId: number;
+  restaurantId?: number;
   items: { id: number; name: string; price: number; quantity: number }[];
   grandTotal: number;
   totalItems: number;
@@ -19,13 +20,6 @@ const methodLabel: Record<string, string> = {
   cod: "Cash on Delivery",
 };
 
-function generateOrderId() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let id = "BOM-";
-  for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
-  return id;
-}
-
 export default function OrderConfirmationPage() {
   const search = useSearch();
 
@@ -39,8 +33,6 @@ export default function OrderConfirmationPage() {
       return null;
     }
   }, [search]);
-
-  const orderId = useMemo(() => generateOrderId(), []);
 
   if (!data) {
     return (
@@ -65,9 +57,11 @@ export default function OrderConfirmationPage() {
             ? "Your order has been placed. Please keep cash ready on delivery."
             : "Payment successful! Your food is being prepared."}
         </p>
-        <div className="inline-block mt-4 bg-primary/10 text-primary text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">
-          Order ID: {orderId}
-        </div>
+        {data.orderNumber && (
+          <div className="inline-block mt-4 bg-primary/10 text-primary text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">
+            Order: {data.orderNumber}
+          </div>
+        )}
       </div>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4">

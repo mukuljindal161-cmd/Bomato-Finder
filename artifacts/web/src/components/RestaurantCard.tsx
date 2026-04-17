@@ -1,6 +1,7 @@
 import { Star, Clock, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import type { Restaurant } from "@/data/restaurants";
+import { getCuisineFallback } from "@/lib/imageFallback";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -29,6 +30,10 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           src={restaurant.image}
           alt={`${restaurant.name} restaurant`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => {
+            const fallback = getCuisineFallback(restaurant.cuisines);
+            if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+          }}
         />
         {!restaurant.isOpen && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

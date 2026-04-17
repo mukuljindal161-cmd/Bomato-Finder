@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from "wouter";
 import { ArrowLeft, Star, Clock, MapPin, ShoppingBag } from "lucide-react";
 import { restaurants } from "@/data/restaurants";
 import { menus, type MenuItem } from "@/data/menu";
+import { getCuisineFallback } from "@/lib/imageFallback";
 
 function PriceLevel({ level }: { level: number }) {
   return (
@@ -194,6 +195,10 @@ export default function RestaurantPage() {
             src={restaurant.image}
             alt={`${restaurant.name} restaurant`}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const fallback = getCuisineFallback(restaurant.cuisines);
+              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <Link href="/">

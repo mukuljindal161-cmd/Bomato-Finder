@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from "wouter";
 import { ArrowLeft, Star, Clock, MapPin, ShoppingBag } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { getCuisineFallback } from "@/lib/imageFallback";
+import { getFoodImage } from "@/lib/foodImages";
 
 type ApiRestaurant = {
   id: number;
@@ -78,8 +79,11 @@ function ItemCounter({ count, onAdd, onIncrement, onDecrement }: {
 function MenuItemRow({ item, count, onAdd, onIncrement, onDecrement }: {
   item: ApiMenuItem; count: number; onAdd: () => void; onIncrement: () => void; onDecrement: () => void;
 }) {
+  const [imgError, setImgError] = useState(false);
+  const foodImg = getFoodImage(item.name, item.categoryName);
+
   return (
-    <div className="flex items-center justify-between gap-4 py-4 border-b border-border last:border-0">
+    <div className="flex items-start gap-4 py-4 border-b border-border last:border-0">
       <div className="flex-1 min-w-0">
         <h4 className="font-semibold text-foreground text-base leading-snug">{item.name}</h4>
         {item.description && (
@@ -87,7 +91,17 @@ function MenuItemRow({ item, count, onAdd, onIncrement, onDecrement }: {
         )}
         <p className="text-sm font-bold text-foreground mt-1.5">${Number(item.price).toFixed(2)}</p>
       </div>
-      <ItemCounter count={count} onAdd={onAdd} onIncrement={onIncrement} onDecrement={onDecrement} />
+      <div className="flex flex-col items-center gap-2 flex-shrink-0">
+        {!imgError && (
+          <img
+            src={foodImg}
+            alt={item.name}
+            onError={() => setImgError(true)}
+            className="w-20 h-20 rounded-xl object-cover shadow-sm"
+          />
+        )}
+        <ItemCounter count={count} onAdd={onAdd} onIncrement={onIncrement} onDecrement={onDecrement} />
+      </div>
     </div>
   );
 }

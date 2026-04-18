@@ -80,7 +80,7 @@ function MenuItemRow({ item, count, onAdd, onIncrement, onDecrement }: {
   item: ApiMenuItem; count: number; onAdd: () => void; onIncrement: () => void; onDecrement: () => void;
 }) {
   const [imgError, setImgError] = useState(false);
-  const foodImg = getFoodImage(item.name, item.categoryName);
+  const foodImg = getFoodImage(item.name, item.categoryName, item.id);
 
   return (
     <div className="flex items-start gap-4 py-4 border-b border-border last:border-0">

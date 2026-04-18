@@ -17,48 +17,49 @@ const router = Router();
 
 router.get("/", optionalAuth, async (req, res) => {
   try {
-    const { search, cuisine, priceLevel, isOpen, limit = "20", offset = "0" } = req.query;
+    const { search, cuisine, priceLevel, isOpen, limit = "50", offset = "0" } = req.query;
 
-    const rows = await db
-      .select({
-        restaurant: restaurantsTable,
-        cuisineName: cuisinesTable.name,
-      })
+    const whereConditions = and(
+      eq(restaurantsTable.isActive, true),
+      search ? ilike(restaurantsTable.name, `%${search}%`) : undefined,
+      priceLevel ? eq(restaurantsTable.priceLevel, Number(priceLevel)) : undefined,
+      isOpen === "true" ? eq(restaurantsTable.isOpen, true) : undefined,
+      cuisine
+        ? sql`${restaurantsTable.id} IN (
+            SELECT rc.restaurant_id FROM restaurant_cuisines rc
+            JOIN cuisines c ON c.id = rc.cuisine_id
+            WHERE LOWER(c.name) = LOWER(${cuisine})
+          )`
+        : undefined,
+    );
+
+    const restaurantRows = await db
+      .select()
       .from(restaurantsTable)
-      .leftJoin(restaurantCuisinesTable, eq(restaurantCuisinesTable.restaurantId, restaurantsTable.id))
-      .leftJoin(cuisinesTable, eq(cuisinesTable.id, restaurantCuisinesTable.cuisineId))
-      .where(
-        and(
-          eq(restaurantsTable.isActive, true),
-          search ? ilike(restaurantsTable.name, `%${search}%`) : undefined,
-          priceLevel ? eq(restaurantsTable.priceLevel, Number(priceLevel)) : undefined,
-          isOpen === "true" ? eq(restaurantsTable.isOpen, true) : undefined,
-          cuisine
-            ? sql`${restaurantsTable.id} IN (
-                SELECT rc.restaurant_id FROM restaurant_cuisines rc
-                JOIN cuisines c ON c.id = rc.cuisine_id
-                WHERE LOWER(c.name) = LOWER(${cuisine})
-              )`
-            : undefined,
-        ),
-      )
+      .where(whereConditions)
       .limit(Number(limit))
-      .offset(Number(offset));
+      .offset(Number(offset))
+      .orderBy(restaurantsTable.id);
 
-    const restaurantMap = new Map<number, { restaurant: typeof restaurantsTable.$inferSelect; cuisines: string[] }>();
-    for (const row of rows) {
-      if (!restaurantMap.has(row.restaurant.id)) {
-        restaurantMap.set(row.restaurant.id, { restaurant: row.restaurant, cuisines: [] });
-      }
-      if (row.cuisineName) {
-        restaurantMap.get(row.restaurant.id)!.cuisines.push(row.cuisineName);
-      }
+    if (restaurantRows.length === 0) {
+      res.json({ restaurants: [], total: 0 });
+      return;
     }
 
-    const restaurants = Array.from(restaurantMap.values()).map(({ restaurant, cuisines }) => ({
-      ...restaurant,
-      cuisines,
-    }));
+    const ids = restaurantRows.map((r) => r.id);
+    const cuisineRows = await db
+      .select({ restaurantId: restaurantCuisinesTable.restaurantId, cuisineName: cuisinesTable.name })
+      .from(restaurantCuisinesTable)
+      .innerJoin(cuisinesTable, eq(cuisinesTable.id, restaurantCuisinesTable.cuisineId))
+      .where(sql`${restaurantCuisinesTable.restaurantId} = ANY(${sql.raw(`ARRAY[${ids.join(",")}]::int[]`)})`);
+
+    const cuisineMap = new Map<number, string[]>();
+    for (const row of cuisineRows) {
+      if (!cuisineMap.has(row.restaurantId)) cuisineMap.set(row.restaurantId, []);
+      cuisineMap.get(row.restaurantId)!.push(row.cuisineName);
+    }
+
+    const restaurants = restaurantRows.map((r) => ({ ...r, cuisines: cuisineMap.get(r.id) ?? [] }));
 
     res.json({ restaurants, total: restaurants.length });
   } catch (e) {

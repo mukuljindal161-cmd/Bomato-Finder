@@ -25,7 +25,9 @@ Purpose- Built to practice frontend development, UI design, and creating real-wo
 
 👨‍💻 Author- Mukul Jindal
 
-GitHub: https://github.com/mukuljindal161-cmd 
-LinkedIn: www.linkedin.com/in/mukuljindal07
+GitHub: 
+https://github.com/mukuljindal161-cmd 
+LinkedIn: 
+www.linkedin.com/in/mukuljindal07
 
 ⭐ Feel free to explore and give feedback!

@@ -1,6 +1,6 @@
-#  Zomato Clone Website
+#  Swiggy Clone Website
 
-A responsive **Zomato-inspired food discovery website** built using modern web technologies. This project focuses on recreating the user interface and experience of a food delivery platform with an attractive and user-friendly design.
+A responsive **Swiggy-inspired food discovery website** built using modern web technologies. This project focuses on recreating the user interface and experience of a food delivery platform with an attractive and user-friendly design.
 
 🚀 Features
 
